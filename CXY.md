@@ -199,7 +199,9 @@ void sys_seek(struct intr_frame* f)
 > 3. 调用 file_seek() 指定输入的文件指针偏移量
 > 4. 调用 release_lock_f() 释放锁
 
+函数流程图：
 
+![sys_seek](E:\学习\大三\大三上\操作系统\项目\实验\Pintos-Project2\picture\sys_seek.png)
 
 ### tell
 
