@@ -261,12 +261,31 @@ void sys_close(struct intr_frame* f)
 
 
 
-### find_file_id
-
-
-
-### exit_special
-
-
-
 ### is_valid_pointer
+
+功能：检查用户指针是否有效
+
+实现函数：
+
+```c++
+bool is_valid_pointer (void* esp,uint8_t argc)
+```
+
+> 传入参数：
+>
+> ```c
+> void* esp		// 栈顶指针
+> uint8_t argc	// 页数
+> ```
+>
+> 操作步骤：
+>
+> 1. 对于每个参数调用is_user_vaddr检查esp是否是有效的用户地址指针
+>    - 如果没有返回false
+>    - 如果有效：调用pagedir_get_page检查是否有可调用的虚拟内存空间（页）
+>      - 如果失败一次，返回false。
+>      - 获得全部的虚拟内存（页），返回true。
+
+函数调用图：
+
+![is_valid_pointer](.\picture\is_valid_pointer.png)
