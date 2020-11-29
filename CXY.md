@@ -18,9 +18,14 @@ void sys_create(struct intr_frame *f)
 >
 > 操作步骤：
 >
-> 1. 调用 acquire_lock_f() 获取文件写锁
-> 2. 调用 filesys_create() 创建文件
-> 3. 调用 release_lock_f() 释放锁
+> 1. 检查地址空间大小是否足够
+> 2. 调用 acquire_lock_f() 获取文件写锁
+> 3. 调用 filesys_create() 创建文件
+> 4. 调用 release_lock_f() 释放锁
+
+函数流程图：
+
+![sys_create](.\picture\sys_create.png)
 
 ### remove
 
@@ -44,6 +49,10 @@ void sys_remove(struct intr_frame* f)
 > 2. 调用 filesys_remove() 删除文件
 > 3. 调用 release_lock_f() 释放锁
 
+函数流程图：
+
+![sys_remove](.\picture\sys_remove.png)
+
 ### open
 
 功能：根据中断结构栈指针，打开已有文件。
@@ -65,8 +74,12 @@ void sys_open(struct intr_frame* f)
 > 1. 调用 acquire_lock_f() 获取文件写锁
 > 2. 调用 filesys_open() 打开文件
 > 3. 调用 release_lock_f() 释放锁
-> 4. - 如果文件成功打开，将打开的文件放到当前线程打开的文件队列thread_file_temp中
->    - 如果打开失败，文件返回-1状态值
+> 4. - 如果文件成功打开，将打开的文件放到当前线程打开的文件队列thread_file_temp中，返回文件id为当前文件池fd。
+>    - 如果打开失败，文件返回fd=-1失败状态值
+
+函数流程图：
+
+![sys_open](.\picture\sys_open.png)
 
 ### filesize
 
@@ -91,6 +104,10 @@ void sys_filesize(struct intr_frame* f)
 > 3. 调用 release_lock_f() 释放锁
 > 4. - 如果成功在队列中找到文件，调用file_length()获取文件长度
 >    - 如果失败，文件返回-1状态值
+
+函数流程图：
+
+![sys_filesize](.\picture\sys_filesize.png)
 
 ### read
 
@@ -122,6 +139,10 @@ void sys_read(struct intr_frame* f)
 >         - 如果指针存在，则获取文件锁，通过file_read()读取文件后释放文件锁
 >         - 如果指针不存在，文件返回-1状态值。
 
+函数流程图：
+
+![sys_read](.\picture\sys_read.png)
+
 ### write
 
 功能：根据中断结构栈指针，从缓冲区写入文件。
@@ -149,8 +170,11 @@ void sys_write(struct intr_frame* f)
 >    - 否则，则将在当前线程的文件列表中根据fid读取文件
 >
 >      - 如果指针存在，则获取文件锁，通过file_read()读取文件后释放文件锁。
->
->      - 如果指针不存在，文件返回-1状态值。
+>- 如果指针不存在，文件返回-1状态值。
+
+函数流程图：
+
+![sys_write](.\picture\sys_write.png)
 
 ### seek
 
@@ -175,6 +199,8 @@ void sys_seek(struct intr_frame* f)
 > 3. 调用 file_seek() 指定输入的文件指针偏移量
 > 4. 调用 release_lock_f() 释放锁
 
+
+
 ### tell
 
 功能：根据中断结构栈指针，查找已有文件。
@@ -198,6 +224,10 @@ void sys_tell(struct intr_frame* f)
 > 3. 调用 file_tell() 获取的文件指针偏移量
 > 4. 调用 release_lock_f() 释放锁
 
+函数流程图：
+
+![sys_tell](.\picture\sys_tell.png)
+
 ### close
 
 功能：根据中断结构栈指针，关闭已打开文件。
@@ -220,26 +250,12 @@ void sys_close(struct intr_frame* f)
 > 2. 调用 acquire_lock_f() 获取文件写锁
 > 3. 调用 file_close() 关闭文件。
 > 4. 调用 release_lock_f() 释放锁
+> 5. 调用list_remove()将当前关闭文件从打开文件队列中去除
+> 6. 调用free()释放关闭文件的存储空间。
 
+函数调用图：
 
-
-### acquire_lock_f
-
-
-
-### release_lock_f
-
-
-
-### filesys_create
-
-
-
-### filesys_remove
-
-
-
-### filesys_open
+![sys_close](.\picture\sys_close.png)
 
 
 
@@ -247,19 +263,7 @@ void sys_close(struct intr_frame* f)
 
 
 
-### file_length
-
-
-
-### file_seek
-
-
-
-### fild_tell
-
-
-
-### fild_close
+### exit_special
 
 
 
